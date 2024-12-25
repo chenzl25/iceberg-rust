@@ -2655,7 +2655,8 @@
     };
     <span class="kw">use </span><span class="kw">crate</span>::spec::{
         DataContentType, DataFile, DataFileFormat, Datum, NestedField, PartitionSpec,
-        PrimitiveType, Schema, Struct, Transform, Type, UnboundPartitionField,
+        PartitionSpecRef, PrimitiveType, Schema, SchemaRef, Struct, Transform, Type,
+        UnboundPartitionField,
     };
 
     <span class="kw">const </span>INT_MIN_VALUE: i32 = <span class="number">30</span>;
@@ -2663,10 +2664,10 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_data_file_no_partitions() {
-        <span class="kw">let </span>(table_schema_ref, _partition_spec_ref) = create_test_schema_and_partition_spec();
+        <span class="kw">let </span>(_partition_spec_ref, schema_ref) = create_test_partition_spec();
 
         <span class="kw">let </span>partition_filter = Predicate::AlwaysTrue
-            .bind(table_schema_ref.clone(), <span class="bool-val">false</span>)
+            .bind(schema_ref.clone(), <span class="bool-val">false</span>)
             .unwrap();
 
         <span class="kw">let </span>case_sensitive = <span class="bool-val">false</span>;
@@ -3804,7 +3805,7 @@
         <span class="macro">assert!</span>(result, <span class="string">"Should read: NotIn on no nulls column"</span>);
     }
 
-    <span class="kw">fn </span>create_test_schema_and_partition_spec() -&gt; (Arc&lt;Schema&gt;, Arc&lt;PartitionSpec&gt;) {
+    <span class="kw">fn </span>create_test_partition_spec() -&gt; (PartitionSpecRef, SchemaRef) {
         <span class="kw">let </span>table_schema = Schema::builder()
             .with_fields(<span class="macro">vec!</span>[Arc::new(NestedField::optional(
                 <span class="number">1</span>,
@@ -3815,7 +3816,7 @@
             .unwrap();
         <span class="kw">let </span>table_schema_ref = Arc::new(table_schema);
 
-        <span class="kw">let </span>partition_spec = PartitionSpec::builder(<span class="kw-2">&amp;</span>table_schema_ref)
+        <span class="kw">let </span>partition_spec = PartitionSpec::builder(table_schema_ref.clone())
             .with_spec_id(<span class="number">1</span>)
             .add_unbound_fields(<span class="macro">vec!</span>[UnboundPartitionField::builder()
                 .source_id(<span class="number">1</span>)
@@ -3826,8 +3827,7 @@
             .unwrap()
             .build()
             .unwrap();
-        <span class="kw">let </span>partition_spec_ref = Arc::new(partition_spec);
-        (table_schema_ref, partition_spec_ref)
+        (Arc::new(partition_spec), table_schema_ref)
     }
 
     <span class="kw">fn </span>not_null(reference: <span class="kw-2">&amp;</span>str) -&gt; BoundPredicate {
@@ -4151,7 +4151,7 @@
             nan_value_counts: Default::default(),
             lower_bounds: Default::default(),
             upper_bounds: Default::default(),
-            key_metadata: <span class="macro">vec!</span>[],
+            key_metadata: <span class="prelude-val">None</span>,
             split_offsets: <span class="macro">vec!</span>[],
             equality_ids: <span class="macro">vec!</span>[],
             sort_order_id: <span class="prelude-val">None</span>,
@@ -4172,7 +4172,7 @@
             nan_value_counts: Default::default(),
             lower_bounds: Default::default(),
             upper_bounds: Default::default(),
-            key_metadata: <span class="macro">vec!</span>[],
+            key_metadata: <span class="prelude-val">None</span>,
             split_offsets: <span class="macro">vec!</span>[],
             equality_ids: <span class="macro">vec!</span>[],
             sort_order_id: <span class="prelude-val">None</span>,
@@ -4229,7 +4229,7 @@
             ]),
 
             column_sizes: Default::default(),
-            key_metadata: <span class="macro">vec!</span>[],
+            key_metadata: <span class="prelude-val">None</span>,
             split_offsets: <span class="macro">vec!</span>[],
             equality_ids: <span class="macro">vec!</span>[],
             sort_order_id: <span class="prelude-val">None</span>,
@@ -4255,7 +4255,7 @@
             upper_bounds: HashMap::from([(<span class="number">3</span>, Datum::string(<span class="string">"dC"</span>))]),
 
             column_sizes: Default::default(),
-            key_metadata: <span class="macro">vec!</span>[],
+            key_metadata: <span class="prelude-val">None</span>,
             split_offsets: <span class="macro">vec!</span>[],
             equality_ids: <span class="macro">vec!</span>[],
             sort_order_id: <span class="prelude-val">None</span>,
@@ -4282,7 +4282,7 @@
             upper_bounds: HashMap::from([(<span class="number">3</span>, Datum::string(<span class="string">"3str3"</span>))]),
 
             column_sizes: Default::default(),
-            key_metadata: <span class="macro">vec!</span>[],
+            key_metadata: <span class="prelude-val">None</span>,
             split_offsets: <span class="macro">vec!</span>[],
             equality_ids: <span class="macro">vec!</span>[],
             sort_order_id: <span class="prelude-val">None</span>,
@@ -4309,7 +4309,7 @@
             upper_bounds: HashMap::from([(<span class="number">3</span>, Datum::string(<span class="string">"イロハニホヘト"</span>))]),
 
             column_sizes: Default::default(),
-            key_metadata: <span class="macro">vec!</span>[],
+            key_metadata: <span class="prelude-val">None</span>,
             split_offsets: <span class="macro">vec!</span>[],
             equality_ids: <span class="macro">vec!</span>[],
             sort_order_id: <span class="prelude-val">None</span>,
